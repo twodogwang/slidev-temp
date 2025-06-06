@@ -7,15 +7,15 @@ lineNumbers: false
 routerMode: 'hash'
 
 info: |
-  ## Hello Slidev
+  ## 关于path引发的错误
 
 drawings:
   persist: false
 css: unocss
-title: Hello Slidev
+title: 关于path引发的错误
 ---
 
-# **Hello Slidev**
+# **关于path引发的错误**
 
 <div
 v-motion
@@ -23,11 +23,9 @@ v-motion
 :enter="{ x: 0, opacity: 1,  scale: 1.5, transition: { delay: 100, duration: 2500 } }"
 >
   <span class="color-orange text-xl">
-    ikun — 南京
+    Kyon
   </span>
 </div>
-
-模板地址 [https://github.com/godkun/ppt-template](https://github.com/godkun/ppt-template)
 
 ---
 src: ./pages/目录.md
