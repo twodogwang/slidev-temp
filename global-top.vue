@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import Progress from './components/Progress.vue'
+import { useNav, useSlideContext } from '@slidev/client'
 import { computed } from 'vue'
 
+const { currentPage, total } = useNav()
+
+const { $slidev } = useSlideContext()
+
 const num = computed(() => {
-  const p = ($slidev.nav.currentPage / $slidev.nav.total) * 100
+  const p = (currentPage.value / total.value) * 100
   return Math.floor(p)
 })
 </script>
 
 <template>
   <div v-if="![1, 2, $slidev.nav.total + 1].includes($slidev.nav.currentPage)">
-    <div class="top absolute top-0 right-0 p-2">公司名字</div>
-    <div class="progress absolute top-0 left-0">
-      <Progress :targetValue="num" />
+    <div class="top absolute top-0 right-0 p-2">
+      <!-- <img src="/share/giga.png" alt="logo" class="h-6" /> -->
     </div>
   </div>
 </template>

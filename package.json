@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@slidev/cli": "*",
-    "@slidev/theme-default": "*"
+    "@slidev/theme-default": "*",
+    "@slidev/theme-seriph": "^0.25.0"
   },
   "devDependencies": {
     "less": "^4.1.3",

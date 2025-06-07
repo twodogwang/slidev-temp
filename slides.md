@@ -1,9 +1,9 @@
 ---
-theme: default
-background: /title-bg.jpg
+theme: seriph
+background: https://cover.sli.dev
 class: text-center
 highlighter: shiki
-lineNumbers: false
+transition: slide-left
 routerMode: 'hash'
 
 info: |
@@ -28,7 +28,11 @@ v-motion
 </div>
 
 ---
-src: ./pages/目录.md
+src: ./pages/share/bug展示.md
+---
+
+---
+src: ./pages/share/bug1.md
 ---
 
 ---
@@ -37,10 +41,6 @@ src: ./pages/图像.md
 
 ---
 src: ./pages/图片轮播.md
----
-
----
-src: ./pages/抽屉功能.md
 ---
 
 ---
