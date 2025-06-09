@@ -43,6 +43,11 @@ const vnode = {
 
 这样就得到了一个简单的vnode，vue中的vnode的结构就类似这样，只是会添加上很多附属的字段用于详细描述节点的各个属性，同时它也是渲染函数的返回值，`patch`阶段就是其实针对它进行处理
 
+<!--
+1. 为什么需要虚拟节点 A:在声明式框架下的平衡方案
+2. 为什么需要sameVnode，意义是什么 A:新旧vnode描述的内容需要一致，例如旧vnode渲染一个p元素，新的vnode渲染一个img元素，这样就失去了打补丁的意义，因为我们要先卸载旧的元素新建新的元素才能实现效果，无法在旧的元素上通过添加属性等操作来实现
+-->
+
 ---
 
 在vue中，有专门的判断是否是`sameVnode`的方法
@@ -176,7 +181,7 @@ layoutClass: gap-16
 
 ### 查看选项切换前后vnode列表
 
-```ts {monaco-diff}
+```ts {monaco-diff}{lines: true}
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
@@ -226,6 +231,10 @@ const vnode = [
 2. 或者我们手动给将要`patch`的两个模板节点添加对应的`key`，手动指定一个可以正确复用的节点顺序的key，而不是使用vue默认的头尾节点对比，同样也可以解决这个问题。
 
 </v-clicks>
+
+<!--
+两种解决方案分别在源代码中进行演示，展示效果
+-->
 
 ---
 src: ./bug1-else-if.md

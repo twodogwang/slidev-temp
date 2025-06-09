@@ -2,7 +2,7 @@
 
 观察两组列表，可以发现其中有非常多的注释类型的vnode，这里我们排除掉那些不会影响`patch`时vnode顺序的节点便于观察
 
-```ts {monaco-diff}
+```ts {monaco-diff}{lines: true}
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
@@ -28,7 +28,56 @@ const vnode = [
 
 </v-click>
 
-<v-clicks> 
+---
+
+````md magic-move {lines: true}
+```ts
+// 旧vnode列表
+const vnode = [
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
+];
+```
+
+```ts
+// 旧vnode列表
+const vnode = [
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' }, // 我俩可以patch了
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+];
+```
+
+
+````
+
+````md magic-move {lines: true}
+```ts
+// 新vnode列表
+const vnode = [
+  { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
+];
+```
+```ts
+// 新vnode列表
+const vnode = [
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined }, // 我俩可以patch了
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
+  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
+];
+```
+````
+
+<v-clicks>
 
 - 那么我们就要想办法消除这些多余的影响`patch`过程的节点，怎么消除呢
 - 首先我们要了解为什么会多出这些多余的空白注释vnode节点
@@ -37,7 +86,6 @@ const vnode = [
 
 ---
 
-
 <n-space>
   我们来看一个简化版的<span class="underline cursor-pointer" @click="showDrawer">demo</span>
 
@@ -45,9 +93,6 @@ const vnode = [
     <iframe width="100%" height="100%" :src="url" frameborder="0"></iframe>
   </n-drawer>
 </n-space>
-
-
-
 
 <script setup>
   import { ref } from 'vue'
@@ -72,7 +117,6 @@ const vnode = [
 可以看到简化版的demo有着同样的问题，切换前后渲染的dom位置不停变化，现象相同，所以我们可以通过观察这个简化组件来解决上面的问题
 
 </v-click>
-
 
 <div v-click="2" @click="showRender = true">
 
@@ -159,6 +203,30 @@ export function installRenderHelpers(target: any) {
 ```
 
 找到`_v`和`_e`对应的方法，可以看到分别是`createTextVNode`和`createEmptyVNode`的方法别名。很容易从函数名看出一个是创建文本vnode，一个是创建空的vnode。
+
+---
+
+```javascript {all|4-17}
+function render() {
+  var _vm = this, _c = _vm._self._c, _setup = _vm._self._setupProxy;
+  return _c("div", { staticClass: "demo" }, [
+    _setup.boolean 
+    ? [
+      _c("div", { ref: "div1", staticStyle: { "color": "orange" } },
+       [_vm._v(" 我是直的 ")]),
+        _c("div", { staticStyle: { "color": "red" } },
+         [_vm._v(" 我是红色 ")])] 
+         : _vm._e(), 
+         !_setup.boolean 
+         ? [
+          _c("div", { staticStyle: { "color": "blue" } },
+           [_vm._v(" 我是蓝色 ")]),
+            _c("div", { ref: "div4", staticStyle: { "color": "green" } },
+             [_vm._v(" 我是瘦的 ")])]
+          : _vm._e()], 2);
+}
+
+```
 
 也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时正常渲染结果，为否时渲染空的注释节点，这也就是为什么上面的vnode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点
 
@@ -250,7 +318,7 @@ function genIfConditions(
 
 这时候我们再看项目中代码
 
-```vue {maxHeight:'300px'}
+```vue {maxHeight:'100px'}
 <!-- 多选下拉 -->
 <template v-if="item.input_type === 'select_multi'">
   <div class="w-20%">
@@ -300,15 +368,15 @@ function render() {
   var _vm = this, _c = _vm._self._c, _setup = _vm._self._setupProxy;
   return _c("div", { staticClass: "demo" }, 
     [_setup.boolean 
-      ? [_c("div", { ref: "div1", staticStyle: { "color": "orange" } }, [_vm._v(" \u6211\u662F\u76F4\u7684 ")]), _c("div", { staticStyle: { "color": "red" } }, [_vm._v(" \u6211\u662F\u7EA2\u8272 ")])] 
+      ? [_c("div", { ref: "div1", staticStyle: { "color": "orange" } }, [_vm._v(" 我是直的 ")]), _c("div", { staticStyle: { "color": "red" } }, [_vm._v(" 我是红色 ")])] 
       : _setup.boolean === false
-       ? [_c("div", { staticStyle: { "color": "blue" } }, [_vm._v(" \u6211\u662F\u84DD\u8272 ")]), _c("div", { ref: "div4", staticStyle: { "color": "green" } }, [_vm._v(" \u6211\u662F\u7626\u7684 ")])]
+       ? [_c("div", { staticStyle: { "color": "blue" } }, [_vm._v(" 我是蓝色 ")]), _c("div", { ref: "div4", staticStyle: { "color": "green" } }, [_vm._v(" 我是瘦的 ")])]
        : _vm._e()], 2);
 }
 ```
 
 可以看到两处`_setup.boolean`的判断条件都并到了一个三元表达式中，这样在条件发生切换时，都只会影响一条三元表达式的值，而不会出现多余的注释空节点影响`patch`的结果。
 
-同样的，我们把出问题的代码中多的`v-if`改为`v-else-if`，问题也同样解决了
+同样的，我们可以把出问题的代码中多的`v-if`改为`v-else-if`，发现问题也同样解决了
 
 ---
