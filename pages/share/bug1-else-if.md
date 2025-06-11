@@ -2,7 +2,7 @@
 
 观察两组列表，可以发现其中有非常多的注释类型的vnode，这里我们排除掉那些不会影响`patch`时vnode顺序的节点便于观察
 
-```ts {monaco-diff}{lines: true}
+```ts {monaco-diff}
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
@@ -30,7 +30,7 @@ const vnode = [
 
 ---
 
-````md magic-move {lines: true}
+````md magic-move 
 ```ts
 // 旧vnode列表
 const vnode = [
@@ -55,7 +55,7 @@ const vnode = [
 
 ````
 
-````md magic-move {lines: true}
+````md magic-move 
 ```ts
 // 新vnode列表
 const vnode = [
@@ -146,7 +146,7 @@ const vnode = [
 
 ---
 
-```javascript {all|4-17}
+```javascript {all|4-17}{maxHeight:'400px'}
 function render() {
   var _vm = this, _c = _vm._self._c, _setup = _vm._self._setupProxy;
   return _c("div", { staticClass: "demo" }, [
@@ -157,13 +157,14 @@ function render() {
         _c("div", { staticStyle: { "color": "red" } },
          [_vm._v(" 我是红色 ")])] 
          : _vm._e(), 
-         !_setup.boolean 
-         ? [
-          _c("div", { staticStyle: { "color": "blue" } },
-           [_vm._v(" 我是蓝色 ")]),
-            _c("div", { ref: "div4", staticStyle: { "color": "green" } },
-             [_vm._v(" 我是瘦的 ")])]
-          : _vm._e()], 2);
+    !_setup.boolean 
+    ? [
+    _c("div", { staticStyle: { "color": "blue" } },
+      [_vm._v(" 我是蓝色 ")]),
+      _c("div", { ref: "div4", staticStyle: { "color": "green" } },
+        [_vm._v(" 我是瘦的 ")])]
+    : _vm._e()
+    ], 2);
 }
 
 ```
@@ -206,7 +207,7 @@ export function installRenderHelpers(target: any) {
 
 ---
 
-```javascript {all|4-17}
+```javascript {all|4-17}{maxHeight:'300px'}
 function render() {
   var _vm = this, _c = _vm._self._c, _setup = _vm._self._setupProxy;
   return _c("div", { staticClass: "demo" }, [
@@ -217,13 +218,14 @@ function render() {
         _c("div", { staticStyle: { "color": "red" } },
          [_vm._v(" 我是红色 ")])] 
          : _vm._e(), 
-         !_setup.boolean 
-         ? [
-          _c("div", { staticStyle: { "color": "blue" } },
-           [_vm._v(" 我是蓝色 ")]),
-            _c("div", { ref: "div4", staticStyle: { "color": "green" } },
-             [_vm._v(" 我是瘦的 ")])]
-          : _vm._e()], 2);
+    !_setup.boolean 
+    ? [
+    _c("div", { staticStyle: { "color": "blue" } },
+      [_vm._v(" 我是蓝色 ")]),
+      _c("div", { ref: "div4", staticStyle: { "color": "green" } },
+        [_vm._v(" 我是瘦的 ")])]
+    : _vm._e()
+          ], 2);
 }
 
 ```
@@ -233,11 +235,11 @@ function render() {
 所以既然`v-if`的渲染存在空注释节点的问题，我们需要去查看渲染函数的生成，看看`v-if`的模板是如何编译成这样的渲染函数的
 
 ---
-layout: two-cols
-layoutClass: gap-16
----
 
-```ts
+<div class="flex gap-12px">
+<div class="flex-1 w-0">
+
+```ts {all}{maxHeight:'400px'}
 // src\compiler\parser\index.ts
 // parser阶段
 
@@ -272,9 +274,10 @@ function processIf(el) {
 }
 ```
 
-::right::
+</div>
+<div class="flex-1 w-0">
 
-```ts
+```ts {all}{maxHeight:'400px'}
 // src\compiler\codegen\index.ts
 // generatecode阶段
 
@@ -312,13 +315,16 @@ function genIfConditions(
 }
 ```
 
+</div>
+</div>
+
 可以看到单独的`v-if`由于只有一个条件，在第二次调用`genIfConditions`的时候条件已经为空了，所以生成了空节点，那么如果只要这时候条件不为空，就可以避免影响`patch`的注释节点产生
 
 ---
 
 这时候我们再看项目中代码
 
-```vue {maxHeight:'100px'}
+```vue {all}{maxHeight:'300px'}
 <!-- 多选下拉 -->
 <template v-if="item.input_type === 'select_multi'">
   <div class="w-20%">

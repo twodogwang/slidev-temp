@@ -1,4 +1,4 @@
-## 问题1：
+## 问题1
 
 ### 切换了类型后，红色报错提示的样式转移到了另一个元素的位置。反复切换类型后，红色报错提示的样式的位置来回变化
 
@@ -139,6 +139,7 @@ const vnode2 = {
 </div>
 
 ---
+
 layout: two-cols
 layoutClass: gap-16
 ---
@@ -156,7 +157,6 @@ layoutClass: gap-16
 ---
 
 `updateChildren`方法即大家非常熟悉的双端对比diff法，简单来说就是按照一定的对比顺序对比新旧vnode的子节点列表，尽可能找出可以复用的vnode，之后重复走`patchVnode`的流程，也就是递归地两个两个节点进行`patch`。
-
 
 <v-clicks>
 
@@ -181,7 +181,7 @@ layoutClass: gap-16
 
 ### 查看选项切换前后vnode列表
 
-```ts {monaco-diff}{lines: true}
+```ts {monaco-diff}
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
