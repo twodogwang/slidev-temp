@@ -6,18 +6,14 @@
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
 ];
 ~~~
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
 ];
 ```
@@ -35,9 +31,7 @@ const vnode = [
 // 旧vnode列表
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
 ];
 ```
@@ -46,9 +40,7 @@ const vnode = [
 // 旧vnode列表
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' }, // 我俩可以patch了
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
 ];
 ```
 
@@ -60,18 +52,14 @@ const vnode = [
 // 新vnode列表
 const vnode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
 ];
 ```
 ```ts
 // 新vnode列表
 const vnode = [
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined }, // 我俩可以patch了
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
+  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' }, // 我俩可以patch了
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
 ];
 ```

@@ -185,34 +185,22 @@ layoutClass: gap-16
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
 ];
 ~~~
 // 空白占位vnode的isComment属性为true
 const vnode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
-  { tag: undefined, isComment: false, key: undefined, text: " ", data: undefined },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
 ];
 ```
