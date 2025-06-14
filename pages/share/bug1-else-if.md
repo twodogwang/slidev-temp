@@ -26,7 +26,7 @@ const vnode = [
 
 ---
 
-````md magic-move 
+````md magic-move
 ```ts
 // 旧vnode列表
 const vnode = [
@@ -47,7 +47,7 @@ const vnode = [
 
 ````
 
-````md magic-move 
+````md magic-move
 ```ts
 // 新vnode列表
 const vnode = [
@@ -372,5 +372,3 @@ function render() {
 可以看到两处`_setup.boolean`的判断条件都并到了一个三元表达式中，这样在条件发生切换时，都只会影响一条三元表达式的值，而不会出现多余的注释空节点影响`patch`的结果。
 
 同样的，我们可以把出问题的代码中多的`v-if`改为`v-else-if`，发现问题也同样解决了
-
----

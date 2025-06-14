@@ -139,7 +139,6 @@ const vnode2 = {
 </div>
 
 ---
-
 layout: two-cols
 layoutClass: gap-16
 ---

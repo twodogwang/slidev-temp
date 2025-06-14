@@ -7,15 +7,15 @@ transition: slide-left
 routerMode: 'hash'
 lineNumbers: true
 info: |
-  ## 关于path引发的错误
+  ## 深入理解patch过程
 
 drawings:
   persist: false
 css: unocss
-title: 关于path引发的错误
+title: 深入理解patch过程
 ---
 
-# **关于path引发的错误**
+# **Bug案例原因分享**
 
 <div
 v-motion
@@ -23,7 +23,7 @@ v-motion
 :enter="{ x: 0, opacity: 1,  scale: 1.5, transition: { delay: 100, duration: 2500 } }"
 >
   <span class="color-orange text-xl">
-    Kyon
+    深入理解patch过程
   </span>
 </div>
 
