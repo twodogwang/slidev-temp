@@ -30,8 +30,8 @@ const vnode = [
 ```ts
 // 旧vnode列表
 const vnode = [
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
 ];
 ```
@@ -39,8 +39,8 @@ const vnode = [
 ```ts
 // 旧vnode列表
 const vnode = [
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' }, // 我俩可以patch了
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' }, // 我俩可以patch了
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
 ];
 ```
 
@@ -52,15 +52,15 @@ const vnode = [
 // 新vnode列表
 const vnode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
 ];
 ```
 ```ts
 // 新vnode列表
 const vnode = [
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' }, // 我俩可以patch了
-  { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' }, // 我俩可以patch了
+  { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
 ];
 ```
 ````
@@ -102,7 +102,7 @@ const vnode = [
 
 <v-click>
 
-可以看到简化版的demo有着同样的问题，切换前后渲染的dom位置不停变化，现象相同，所以我们可以通过观察这个简化组件来解决上面的问题
+可以看到简化版的demo有着同样的问题，切换前后渲染的dom位置不停变化，现象相同，所以我们可以通过观察这个简化组件的渲染函数来解决上面的问题
 
 </v-click>
 
@@ -220,7 +220,11 @@ function render() {
 
 也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时正常渲染结果，为否时渲染空的注释节点，这也就是为什么上面的vnode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点
 
-所以既然`v-if`的渲染存在空注释节点的问题，我们需要去查看渲染函数的生成，看看`v-if`的模板是如何编译成这样的渲染函数的
+<v-click>
+
+所以既然`v-if`的渲染存在空注释节点的问题，我们需要去查看渲染函数的生成，看看`v-if`的模板是如何编译成这样的渲染函数，以及我们如何来解决这个问题
+
+</v-click>
 
 ---
 
@@ -260,6 +264,28 @@ function processIf(el) {
     }
   }
 }
+
+// 处理闭合标签方法
+function closeElement(element) {
+    // ...省略
+    if (element.elseif || element.else) {
+      processIfConditions(element, currentParent)
+    } else {
+      // ...省略
+  }
+}
+
+// 处理v-else等
+function processIfConditions(el, parent) {
+  const prev = findPrevElement(parent.children)
+  if (prev && prev.if) {
+    addIfCondition(prev, {
+      exp: el.elseif,
+      block: el
+    })
+  }
+}
+
 ```
 
 </div>
@@ -357,7 +383,7 @@ function genIfConditions(
 
 还是用刚才的简单的demo举例，改为`v-else-if`后，生成的渲染函数变为
 
-```javascript
+```javascript {all|4-8}
 function render() {
   var _vm = this, _c = _vm._self._c, _setup = _vm._self._setupProxy;
   return _c("div", { staticClass: "demo" }, 
