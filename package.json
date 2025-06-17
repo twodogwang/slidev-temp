@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "godkun <godkun666@126.com>",
   "scripts": {
-    "build": "slidev build",
+    "build": "slidev build --base /dist",
     "dev": "slidev",
     "export": "slidev export",
     "format": "prettier -w -u ."

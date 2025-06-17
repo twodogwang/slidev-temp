@@ -20,7 +20,7 @@ const vnode = [
 
 <v-click>
 
-可以发现两组vnode列表中有许多空的注释节点，例如左侧的最后一个节点和右侧的第一个节点，正是这些注释类型的vnode导致了`patch`过程中位置的变化，因为头部尾部都不再能够直接修补，如果没有这些注释节点，`patch`的时候顺序就不会变化了
+可以发现两组简化后vnode列表中存在空的注释节点，例如旧的vnode列表的最后一个节点和新vnode列表的第一个节点，正是这些注释类型的vnode导致了`patch`过程中位置的变化，因为头部尾部都不再能够直接修补，如果没有这些注释节点，`patch`的时候顺序就不会变化了
 
 </v-click>
 
@@ -102,7 +102,7 @@ const vnode = [
 
 <v-click>
 
-可以看到简化版的demo有着同样的问题，切换前后渲染的dom位置不停变化，现象相同，所以我们可以通过观察这个简化组件的渲染函数来解决上面的问题
+可以看到简化版的demo有着同样的问题，切换前后渲染的DOM位置不停变化，现象相同，所以我们可以通过观察这个简化组件的渲染函数来解决上面的问题
 
 </v-click>
 
@@ -161,7 +161,7 @@ function render() {
 
 需要重点关注的是渲染函数中`_setup.boolean`这个判断条件后面的渲染内容，
 可以看到两个判断条件对应了两个三元运算表达式，
-而表达式的结果中除了正常的`v-if`条件渲染的内容，都包含`_vm.e()`这个方法调用的结果。
+而表达式的结果中除了正常的`v-if`条件渲染的内容，都包含`_vm._e()`这个方法调用的结果。
 
 </div>
 
@@ -218,11 +218,11 @@ function render() {
 
 ```
 
-也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时正常渲染结果，为否时渲染空的注释节点，这也就是为什么上面的vnode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点
+也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时正常渲染结果，为否时渲染空的注释节点，这也就是为什么上面的vnode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点。那么如何避免生成这个多余的节点呢
 
 <v-click>
 
-所以既然`v-if`的渲染存在空注释节点的问题，我们需要去查看渲染函数的生成，看看`v-if`的模板是如何编译成这样的渲染函数，以及我们如何来解决这个问题
+我们需要去查看渲染函数的生成，看看`v-if`的模板是如何编译成这样的渲染函数，以及我们如何来解决这个问题
 
 </v-click>
 
@@ -235,15 +235,7 @@ function render() {
 // src\compiler\parser\index.ts
 // parser阶段
 
-// 记录下模板定义的v-if判断条件
-function addIfCondition(el: ASTElement, condition: ASTIfCondition) {
-  if (!el.ifConditions) {
-    el.ifConditions = []
-  }
-  // 保存在ifConditions字段中
-  el.ifConditions.push(condition)
-}
-
+// 处理v-if属性
 function processIf(el) {
   // 获取指定attribute的值
   const exp = getAndRemoveAttr(el, 'v-if')
@@ -265,6 +257,15 @@ function processIf(el) {
   }
 }
 
+// 记录下模板定义的v-if判断条件
+function addIfCondition(el: ASTElement, condition: ASTIfCondition) {
+  if (!el.ifConditions) {
+    el.ifConditions = []
+  }
+  // 保存在ifConditions字段中
+  el.ifConditions.push(condition)
+}
+
 // 处理闭合标签方法
 function closeElement(element) {
     // ...省略
@@ -277,8 +278,11 @@ function closeElement(element) {
 
 // 处理v-else等
 function processIfConditions(el, parent) {
+  // 找到前一个节点 其实就是处理之后的v-if的那个节点
   const prev = findPrevElement(parent.children)
+  // 如果前一个节点是有v-if的 因为v-else和v-else-if都是需要紧跟在v-if之后的
   if (prev && prev.if) {
+    // 保存的v-if的那个节点上的数组中
     addIfCondition(prev, {
       exp: el.elseif,
       block: el
@@ -332,7 +336,11 @@ function genIfConditions(
 </div>
 </div>
 
-可以看到单独的`v-if`由于只有一个条件，在第二次调用`genIfConditions`的时候条件已经为空了，所以生成了空节点，那么如果只要这时候条件不为空，就可以避免影响`patch`的注释节点产生
+<v-click>
+
+可以看到单独的`v-if`由于只有一个条件，在第二次调用`genIfConditions`的时候条件已经为空了，所以生成了空节点，那么如果只要这时候条件不为空，就可以避免影响`patch`的注释节点产生。那么如何保证第二次调用的时候条件数组不为空呢，继续看上面的代码
+
+</v-click>
 
 ---
 
@@ -377,7 +385,7 @@ function genIfConditions(
 </template>
 ```
 
-可以看到每个`template`部分其实都是渲染同一个地方，且`v-if`条件其实本身就存在互斥的关系，因此此处应该在第一个`v-if`之后改为使用`v-else-if`进行判断，这样写的作用是会把后续的判断条件放到`ifConditions`数组中，在生成渲染函数的时候便不会直接去生成多个单独的包含空注释节点的三元表达式，而是放在一个嵌套的三元表达式中
+可以看到每个`template`部分其实都是渲染同一个地方，且`v-if`条件其实本身就存在互斥的关系，因此此处应该在第一个`v-if`之后改为使用`v-else-if`进行判断，这样写的作用是会把后续的判断条件放到`v-if`的那个AST节点的`ifConditions`数组中，在生成渲染函数的时候便不会直接去生成多个单独的包含空注释节点的三元表达式，而是放在一个嵌套的三元表达式中
 
 ---
 

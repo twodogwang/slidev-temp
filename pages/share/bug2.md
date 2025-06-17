@@ -1,6 +1,6 @@
 ## 表单的校验方法失效
 
-第二个问题就相对简单了，因为问题产生的原因可以确定就是发生在`form`组件中，我们只要从`form`组件的源码入手即可。`element-ui`的表单校验大家都很熟悉了，主要流程是利用`formItem`组件先在template中定义好需要校验的数据字段值还有校验的方法`rules`，最后通过执行`form`组件的`validate`方法，触发校验流程，返回校验结果。所以我们从校验方法的触发点`validate`开始入手，先来查看它的源码
+第二个问题就相对简单了，因为问题产生的原因可以确定就是发生在`form`组件中，我们只要从`form`组件的源码入手即可。`element-ui`的表单校验大家都很熟悉了，主要流程是利用`formItem`组件先在template中定义好需要校验的数据字段值`prop`还有校验的方法`rules`，最后通过执行`form`组件的`validate`方法，触发校验流程，返回校验结果。所以我们从校验方法的触发点`validate`开始入手，先来查看它的源码
 
 ```javascript {all|24-34}{maxHeight:'222px'}
 validate(callback) {
@@ -95,9 +95,9 @@ validate(callback) {
 
 ---
 
-而继续查看源码可以发现
+查看`formItem`的`validate`方法源码可以发现
 
-```js {4-8}{maxHeight:'400px'}
+```js {3-8}{maxHeight:'400px'}
 validate(trigger, callback = noop) {
   this.validateDisabled = false;
   const rules = this.getFilteredRule(trigger);
@@ -134,7 +134,7 @@ validate(trigger, callback = noop) {
 
 <v-click>
 
-所以我们需要去查看页面切换选项后，`form`组件中`fields`保存的`formItem`的`rules`是否可以正常获取到
+我们需要去查看页面切换选项后，`form`组件中`fields`保存的`formItem`的`rules`是否可以正常获取到
 
 </v-click>
 
@@ -144,13 +144,13 @@ validate(trigger, callback = noop) {
 
 <v-clicks>
 
-上一个问题中我们已经知道，在`patch`过程中，新旧vnode列表存在了错误的复用问题，导致前后dom元素的位置发生错误。那么其实除了元素的复用导致的问题，其中还存在着组件实例复用引发的问题。
+上一个问题中我们已经知道，在`patch`过程中，新旧vnode列表存在了错误的复用问题，导致前后DOM元素的位置发生错误。那么其实除了元素的复用导致的问题，其中还存在着组件实例复用引发的问题。
 
-这里给出一个简单的组件vnode修补流程图
+这里给出一个简单的组件vnode`patch`流程图
 
 <n-image src="/share/componentvnodepatch.png" />
 
-在上面的`patchVnode`示意图中我们可以发现，复用的过程不止存在于普通的元素节点，组件节点也是需要复用的。`patchVnode`过程中，首先会把旧的vnode组件实例直接赋值给新的vnode组件节点，之后把新的vnode组件节点上的属性值（包括`props`，`listeners`，`attrs`等等）赋值给旧的vnode实例，重新去走一遍组件实例的“初始化”流程（处理新赋值的这些属性）。
+在之前的的`patchVnode`示意图中我们已经知道，复用的过程不止存在于普通的元素节点，组件节点也是需要复用的。`patchVnode`过程中，首先会把旧的vnode组件实例直接赋值给新的vnode组件节点，之后把新的vnode组件节点上的属性值（包括`props`，`listeners`，`attrs`等等）赋值给旧的vnode实例，重新去走一遍组件实例的“初始化”流程（处理新赋值的这些属性）。
 
 
 所以这意味着`form`中`fields`字段保存的`formItem`实例在`patch`后，传入的`prop`和`rules`字段的值已经更新为新的vnode上对应的值
@@ -167,6 +167,6 @@ validate(trigger, callback = noop) {
 
 <n-image src="share/patch前后表单.png" class="h-250px" />
 
-那么`prop`和`rules`的字段值也相应的变为新的节点上的值，也就是空。所以在调用校验方法时，并不是不校验，而是没有对应的校验规则去进行校验，自然也就直接返回了校验通过，导致的后续接口调用报错的问题
+那么`prop`和`rules`的字段值也相应的变为新的节点上的值，也就是空。所以在调用校验方法时，并不是不校验，而是没有对应的校验规则去进行校验，自然也就直接返回了校验通过，导致的后续接口调用报错的问题。当然，这个问题已经解决掉了，因为我们解决了第一个错误`patch`的问题，修改后的表单已经可以正常校验了
 
 </v-clicks>

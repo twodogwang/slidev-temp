@@ -38,3 +38,7 @@ src: ./pages/share/bug1.md
 ---
 src: ./pages/share/bug2.md
 ---
+
+---
+src: ./pages/share/end.md
+---
