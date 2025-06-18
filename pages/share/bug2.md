@@ -54,7 +54,7 @@ validate(callback) {
 
 这里给出一张`form`组件和`formItem`组件在校验实现上的简略流程图。
 
-<n-image src="/share/element-form.png" class="h-350px" />
+<n-image src="./share/element-form.png" class="h-350px" />
 
 前面提到的重点，`form`组件的`fields`数组其实保存的就是`formItem`组件，每个`formItem`在`mounted`之后，如果它的`prop`不为空，则会把自身保存在`form`的`fields`中，在`form`校验时，其实就是触发每个`formItem`的校验方法。
 
@@ -70,7 +70,7 @@ validate(callback) {
   <template #trigger>
     <strong class="cursor-pointer"> 变化时机 </strong>
   </template>
-  <n-image src="/share/element-form.png" />
+  <n-image src="./share/element-form.png" />
 </Popover>
 <span>可以发现，只有在子<code>formItem</code>组件的<code>mounted</code>和<code>beforeDestroy</code>时，才会触发<code>form</code>组件的<code>add</code>和<code>remove</code>方法，修改<code>fields</code>数组的内容。</span>
 </div>
@@ -85,7 +85,7 @@ validate(callback) {
 
 还是查看这张流程图，我们重点关注`formItem`的`validate`方法部分：
 
-<n-image src="/share/element-form.png" class="h-250px" />
+<n-image src="./share/element-form.png" class="h-250px" />
 
 可以看到`formItem`在每次校验时，都需要去获取校验的`rules`，也就是规则，规则的定义有多种写法，例如
 
@@ -148,7 +148,7 @@ validate(trigger, callback = noop) {
 
 这里给出一个简单的组件vnode`patch`流程图
 
-<n-image src="/share/componentvnodepatch.png" />
+<n-image src="./share/componentvnodepatch.png" />
 
 在之前的的`patchVnode`示意图中我们已经知道，复用的过程不止存在于普通的元素节点，组件节点也是需要复用的。`patchVnode`过程中，首先会把旧的vnode组件实例直接赋值给新的vnode组件节点，之后把新的vnode组件节点上的属性值（包括`props`，`listeners`，`attrs`等等）赋值给旧的vnode实例，重新去走一遍组件实例的“初始化”流程（处理新赋值的这些属性）。
 

@@ -15,7 +15,7 @@ css: unocss
 title: 深入理解patch过程
 ---
 
-# **Bug案例原因分享**
+# **Bug案例分享**
 
 <div
 v-motion

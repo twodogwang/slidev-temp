@@ -20,7 +20,7 @@
 
 在Vue中，框架去接管的真实元素的渲染部分就是我们熟悉的基于vnode这个概念构建的渲染机制，即运行时渲染器遍历vnode树，根据情况决定是挂载(`mount`)还是更新(`patch`)，使用者不需要手动去执行对应的真实元素的操作，具体的操作交给Vue的渲染器去处理
 
-<n-image src="/share/render.png" />
+<n-image src="./share/render.png" />
 
 <v-click>
 
@@ -197,7 +197,7 @@ layout: two-cols
 layoutClass: gap-16
 ---
 
-<n-image src="/share/patch流程.png" alt="" />
+<n-image src="./share/patch流程.png" alt="" />
 
 ::right::
 
