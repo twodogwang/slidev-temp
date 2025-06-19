@@ -2,39 +2,37 @@
 
 ### 切换了类型后，红色报错提示的样式转移到了另一个元素的位置。反复切换类型后，红色报错提示的样式的位置来回变化
 
-这个问题的重点是某个元素的**位置**发生了变化。
+我们可以发现这个问题的重点是某个元素的**位置**在数据更新后发生了错误的变化。
 
 <v-clicks>
 
-如果是在使用jQuery的项目中产生这种问题，解决起来就会非常清晰。因为每个DOM元素的位置和顺序等都是由用户自己手动操作实现，只需要查看每个DOM操作步骤即可发现是哪一步产生了错误并加以修改。
+如果是在使用jQuery的项目中产生这种问题，解决起来就会非常清晰。因为每个DOM元素的位置和顺序等都是由用户自己手动操作实现，只需要查看每个DOM操作步骤即可发现是哪一步产生了错误
 
-而在Vue中则不同，Vue属于声明式框架，声明式编程关注的是 **"要什么"**。你描述的是期望达到的最终状态，而不是达到这个状态的具体步骤。至于如何实现这个状态，则由底层系统（在前端框架中就是框架本身）来完成，所以类似于在jQuery中手动操作DOM的操作，大部分情况下都已经被Vue接管了，因此要探究元素位置的错误，我们需要深入了解Vue是如何处理真实元素的。
+而在Vue中则不同，Vue属于声明式框架，我们在开发时编写内容的关注点是 **"要什么"**。我们描述的是期望达到的最终状态，而不是达到这个状态的具体步骤，至于如何实现这个状态，则由底层系统（在前端框架中就是框架本身）来完成，所以类似于在jQuery中我们在数据变化时手动操作DOM的操作，大部分情况下都已经被Vue接管了。最常见的就是渲染一个数组类型的数据，我们对一个数组中元素的顺序进行调整，对应的DOM元素位置也会发生变化。而在此过程中，我们没有对DOM元素本身进行操作，我们只是修改了数据，页面的变化是由Vue来完成的
 
-大家可以回忆一下，除去自己手动去操作DOM元素顺序的情况，一般来说，元素的位置顺序发生变化的场景是什么？
-
-最常见的就是渲染一个数组类型的数据，数据本身的顺序发生变化，对应的DOM元素位置也发生变化
+因此要探究元素位置的错误，我们需要去了解Vue在数据变化时是如何反映到真实元素上的。
 
 </v-clicks>
 
 ---
 
-在Vue中，框架去接管的真实元素的渲染部分就是我们熟悉的基于vnode这个概念构建的渲染机制，即运行时渲染器遍历vnode树，根据情况决定是挂载(`mount`)还是更新(`patch`)，使用者不需要手动去执行对应的真实元素的操作，具体的操作交给Vue的渲染器去处理
+在Vue中，框架去接管的真实元素的渲染部分就是我们熟悉的基于vNode这个概念构建的渲染机制，即运行时渲染器遍历vNode树，根据情况决定是挂载(`mount`)还是更新(`patch`)，自动地完成页面的渲染过程
 
 <n-image src="./share/render.png" />
 
 <v-click>
 
-具体的对于真实元素操作发生的时机是在这张渲染流程示意图中的`patch`部分，所以我们需要去了解一下`patch`过程中具体是如何影响到元素的位置变化的
+图中可以看到，从vNode树到真实的Dom，中间经过了一个mount/patch的过程，具体的对于真实元素操作发生的时机是在这张渲染流程示意图中的`patch`部分，所以我们需要去了解一下`patch`过程中具体是如何影响到元素的位置变化的
 
 </v-click>
 
 ---
 
-了解`patch`过程之前，我们需要知道几个概念
+开始之前，我们需要知道几个概念
 
 1. `patch`是什么，为什么需要`patch`
 
-在 Vue 中，patch (打补丁) 是一个核心函数，它的主要职责是：比较新旧两棵虚拟 DOM 树（VNode 树），然后将比较结果反映到真实的 DOM 上，以最少的 DOM 操作来更新视图。
+在 Vue 中，`patch` (打补丁) 是一个核心函数，它的主要职责是：比较新旧两棵虚拟 DOM 树（VNode 树），然后将比较结果反映到真实的 DOM 上，以**最少**的 DOM 操作来更新视图。
 
 可以简单理解为：
 `patch(oldVnode, newVnode)` = 计算差异 (`diff`) + 应用差异 (`apply`) 到真实 DOM。
@@ -43,11 +41,11 @@
 
 那么为什么需要这个步骤呢
 
-假如我们有一个旧的虚拟 DOM 树 (oldVnode)，它对应着当前浏览器中显示的真实 DOM。同时有一个新的虚拟 DOM 树 (newVnode)，它代表了数据改变后视图应该有的样子。如果没有`patch`这个步骤，我们只能简单的去把当前页面对应的真实 DOM 删除，然后把新的vnode树渲染成真实 DOM 插入到页面中完成渲染，这样做的后果是什么呢
+假如我们有一个旧的虚拟 DOM 树 (oldVnode)，它对应着当前浏览器中显示的真实 DOM。同时有一个新的虚拟 DOM 树 (newVnode)，它代表了数据改变后视图应该有的样子。如果没有`patch`这个步骤，我们需要简单的去把当前页面对应的真实 DOM 删除，然后把新的vNode树渲染成真实 DOM 插入到页面中完成渲染，这样做的后果是什么呢
 
-1. 因为只是无脑把 DOM 销毁再重建，即使只是改了一个文案，也需要把 DOM 重新渲染出来，性能很差
+1. 因为只是无脑把 DOM 销毁再重建，即使只是改了一个文案，也需要把整个 DOM 树重新渲染出来，性能存在问题
 
-2. 用户的输入框失焦，滚动条位置变化，动画效果消失等等，体验很差
+2. 用户的输入框失焦，滚动条位置变化，动画效果消失等等，体验不好
 
 因此，我们需要一个`patch`的过程，利用虚拟 DOM 的优势，通过高效的算法来尽量优化真实 DOM 的操作，例如复用 DOM 元素等等。
 
@@ -57,11 +55,11 @@
 
 2. `vNode`和`sameVnode`
 
-`vnode`就是虚拟节点，是一个包含描述真实元素属性的**普通**的`js`对象，例如
+`vNode`就是虚拟节点，是一个包含描述真实元素属性的**普通**的`js`对象，想构造一个vNode其实非常简单，只需要描述出一个节点的重要属性即可，例如
 
 ```js
 // 描述了一个div节点，内容为一个DIV
-const vnode = {
+const vNode = {
   tag: 'div',
   key: '1',
   data: {},
@@ -69,16 +67,16 @@ const vnode = {
 }
 ```
 
-这样就得到了一个简单的vnode，Vue中的vnode的结构就类似这样，只是会添加上很多附属的字段用于详细描述节点的各个属性，同时它也是渲染函数的返回值，`patch`阶段所谓的优化真实 DOM 操作的前提其实就是针对每个vnode节点进行处理
+这样就得到了一个简单的vNode，Vue中的vNode的结构就类似这样，只是会添加上很多附属的字段用于详细描述节点的各个属性，同时它也是Vue中渲染函数的返回值，`patch`阶段所谓的优化真实 DOM 操作的过程其实就是获取到数据变化前后的vNode树进行对比，找出差异点在运用到对应的DOM上
 
 <!--
 1. 为什么需要虚拟节点 A:在声明式框架下的平衡方案
-2. 为什么需要sameVnode，意义是什么 A:新旧vnode描述的内容需要一致，例如旧vnode渲染一个p元素，新的vnode渲染一个img元素，这样就失去了打补丁的意义，因为我们要先卸载旧的元素新建新的元素才能实现效果，无法在旧的元素上通过添加属性等操作来实现
+2. 为什么需要sameVnode，意义是什么 A:新旧vNode描述的内容需要一致，例如旧vNode渲染一个p元素，新的vNode渲染一个img元素，这样就失去了打补丁的意义，因为我们要先卸载旧的元素新建新的元素才能实现效果，无法在旧的元素上通过添加属性等操作来实现
 -->
 
 ---
 
-而`sameVnode`的概念，则表示两个vnode节点是同种节点。为什么要强调同种节点呢？试想一下，假设我们有一对新旧节点如下
+而`sameVnode`的概念，则表示两个vNode节点是同种节点。为什么要强调同种节点呢？试想一下，假设我们有一对新旧节点如下
 
 ```ts
 const oldVnode = {
@@ -98,11 +96,11 @@ const newVnode = {
 }
 ```
 
-如果我们要对其进行复用的话，即使把旧的节点的`text`和`class`都替换成新的节点对应的值，并且把对应的真实元素的属性也进行替换，我们的操作仍然是对原来的`div`进行修改，不管怎么修改他都不会变成`span`，所以不符合实际的要求。因为这两个节点不能走简单的复用逻辑，而是需要走新建和卸载的流程。
+如果我们要对其进行复用的话，即使把旧的节点的`text`和`class`都替换成新的节点对应的值，并且把对应的真实元素的属性也进行替换，我们的操作仍然是对原来的`div`进行修改，不管怎么修改他都不会变成`span`，不符合vNode描述的真实DOM元素的结构。因为这两个节点类型就是不同的，不能走简单的复用逻辑，而是需要走新建和卸载的流程。
 
 ---
 
-所以我们需要`sameVnode`的原因就是为了确认前后两个vnode是否能走`patch`复用修补的逻辑，满足`sameVnode`的条件，才有接下来`patch`的过程。
+所以我们需要`sameVnode`的原因就是为了确认前后两个vNode是否能走`patch`复用修补的逻辑，满足`sameVnode`的条件，才有接下来`patch`的过程。
 
 在Vue中，有专门的判断是否是`sameVnode`的方法
 
@@ -122,7 +120,7 @@ function sameVnode(a, b) {
 }
 ```
 
-满足这些条件则视为同种vnode，这也是两个vnode可以进行`patch`的必要条件
+满足这些条件则视为同种vNode，这也是Vue中两个vNode可以进行`patch`的前提条件
 
 ---
 
@@ -133,14 +131,14 @@ function sameVnode(a, b) {
 
 ```js
 // 我们是sameVnode 因为tag key相同
-const vnode1 = {
+const vNode1 = {
   tag: 'div',
   key: '1',
   data: {},
   text: '一号DIV'
 }
 
-const vnode2 = {
+const vNode2 = {
   tag: 'div',
   key: '1',
   data: {},
@@ -154,14 +152,14 @@ const vnode2 = {
 
 ```js
 // 我们不是sameVnode 因为tag不同
-const vnode1 = {
+const vNode1 = {
   tag: 'div',
   key: '1',
   data: {},
   text: '一号DIV'
 }
 
-const vnode2 = {
+const vNode2 = {
   tag: 'span',
   key: '1',
   data: {},
@@ -174,14 +172,14 @@ const vnode2 = {
 
 ```js
 // 我们不是sameVnode 因为key不同
-const vnode1 = {
+const vNode1 = {
   tag: 'div',
   key: '1',
   data: {},
   text: '一号DIV'
 }
 
-const vnode2 = {
+const vNode2 = {
   tag: 'div',
   key: '2',
   data: {},
@@ -205,17 +203,17 @@ layoutClass: gap-16
 
 <v-click>
 
-观察`patch`的过程可以发现，修补vnode的过程实际是在`patchVnode`方法中，且在`updateChildren`处理之前都是真实元素的复用和属性处理，真正涉及到真实元素顺序变化的地方只有`updateChildren`方法，所以只需要查看`updateChildren`的内部工作原理即可找出该bug影响元素位置的原因。
+观察`patch`的过程可以发现，修补vNode的过程实际是在`patchVnode`方法中，且在`updateChildren`处理之前都是真实元素的复用和属性处理，真正涉及到真实元素顺序变化的地方是在`updateChildren`方法里，所以我们需要查看`updateChildren`的内部工作原理来找出影响元素位置的原因。
 
 </v-click>
 
 ---
 
-`updateChildren`方法即大家非常熟悉的双端对比diff算法，简单来说就是按照一定的对比顺序对比新旧vnode的子节点列表，尽可能找出可以复用的vnode，之后重复走`patchVnode`的流程，也就是递归地两个两个节点进行`patch`。
+`updateChildren`方法就是大家非常熟悉的双端对比diff算法，简单来说就是按照一定的对比顺序对比新旧vNode的子节点列表，尽可能找出可以复用的vNode，之后重复走`patchVnode`的流程，递归地两个两个节点进行复用和修补的过程。
 
 <v-clicks>
 
-双端对比的顺序概括起来就是
+双端对比的顺序简单概括起来就是
 
 1. 头头比较
 2. 尾尾比较
@@ -228,17 +226,17 @@ layoutClass: gap-16
 
 <v-click>
 
-所以此时需要观察有bug的页面中选项切换前后的vnode列表的`patch`过程，看看是否存在上述几种有位置移动的diff场景存在。
+所以此时需要观察有bug的页面中选项切换前后的vNode列表的`diff`过程，看看是否存在上述几种有位置移动的diff场景存在。
 
 </v-click>
 
 ---
 
-### 查看选项切换前后vnode列表
+### 查看选项切换前后vNode列表
 
 ```ts {monaco-diff}
-// 空白占位vnode的isComment属性为true
-const vnode = [
+// 空白占位vNode的isComment属性为true
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
@@ -248,8 +246,8 @@ const vnode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
 ];
 ~~~
-// 空白占位vnode的isComment属性为true
-const vnode = [
+// 空白占位vNode的isComment属性为true
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select1' },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
@@ -264,9 +262,7 @@ const vnode = [
 
 <v-clicks>
 
-根据刚才的双端对比法，我们可以发现在排除了头部和尾部直接可以`patch`的vnode节点后，旧vnode列表的**头部**和新vnode列表的**尾部**的vnode可以进行`patch`，这意味着这个节点被复用的同时，Vue还会把它对应的DOM元素的位置进行调整。
-
-同样的，如果这时候再把选项切换回去，两个vnode列表其实内容没变，只是原来新的变成旧的，旧的变成新的。那`patch`的结果自然也一样，存在着位置变化，这也就解释了为什么出现了这个元素位置反复变化的现象
+根据演示，可以发现在排除了头部和尾部直接可以`patch`的vNode节点后，旧vNode列表的**头部**和新vNode列表的**尾部**的vNode进行了`patch`，这意味着这个节点被复用的同时，Vue还会把它对应的DOM元素的位置进行调整，将旧的头部节点对应的DOM移动到了新节点的位置，因此位置发生了变化
 
 </v-clicks>
 
@@ -278,7 +274,7 @@ const vnode = [
 
 <v-clicks>
 
-1. 比如我们可以不让这个节点进行复用，即在`patch`阶段不让其视为同一类节点。最简单的方法就是自然是给vnode添加不同的自定义的`key`，`key`不同自然也就无法进行修补，只能新增对应的节点，这样也就不存在复用过程中DOM顺序变化的问题了。
+1. 我们可以不让这个节点进行复用，即在`diff`阶段不让其视为同一类节点。最简单的方法就是自然是给vNode添加不同的自定义的`key`，`key`不同自然也就无法进行修补，只能新增对应的节点，这样也就不存在复用过程中DOM顺序变化的问题了。
 2. 既然发生了错误的位置的`patch`，我们只要手动给在正确位置`patch`的两个模板节点添加对应的`key`，手动指定一个可以正确复用的节点顺序的key，而不是使用Vue默认的头尾节点对比，同样也可以解决这个问题。
 
 </v-clicks>

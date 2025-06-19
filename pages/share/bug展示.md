@@ -1,8 +1,8 @@
 ## Bug 现象直观展示
 
-在实际开发中，表单交互和校验是前端开发的高频场景。一个小小的交互 bug，往往会导致用户体验下降，甚至影响业务流程。下面我们通过一个案例，详细分析 Vue 在`patch`时出现的一个典型问题。
+在实际开发中，表单交互和校验是前端开发的高频场景。一个小小的交互 bug，往往会导致用户体验下降，甚至影响业务流程。下面我们通过一个案例，详细分析在使用 Vue 时经常遇到的一类典型问题。
 
-[点击查看 Bug 页面](http://yzc.test/index.php?route=/account/customerpartner/buyergroup/addgroup&type=add)
+[查看Bug](http://yzc.test/index.php?route=/account/customerpartner/buyergroup/addgroup&type=add)
 
 <v-click>
 
@@ -15,7 +15,7 @@
 <v-clicks>
 
 - **报错提示样式错位**：切换类型后，原本应该标红的报错提示会转移到其他元素上，反复切换时，红色提示的位置会来回变化。
-- **表单校验失效**：切换类型后，表单的校验规则没有被正确触发，导致本应校验失败的表单直接通过。
+- **表单校验失效**：切换类型后，表单中定义的校验规则没有被正确触发，导致本应校验失败的表单直接通过。
 
 </v-clicks>
 

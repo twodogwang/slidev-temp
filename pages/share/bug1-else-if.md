@@ -1,17 +1,17 @@
 ## 那么还有其他更简单合理的方案吗
 
-观察两组列表，可以发现其中有非常多的注释类型的vnode，这里我们排除掉那些不会影响`patch`时vnode顺序的节点便于观察
+重新观察两组列表，这里我们排除掉那些不会影响`diff`时vNode顺序的节点便于观察
 
 ```ts {monaco-diff}
-// 空白占位vnode的isComment属性为true
-const vnode = [
+// 空白占位vNode的isComment属性为true
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select2' },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select3' },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
 ];
 ~~~
-// 空白占位vnode的isComment属性为true
-const vnode = [
+// 空白占位vNode的isComment属性为true
+const vNode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-20%" },children:'el-select3' },
   { tag: "div", isComment: false, key: undefined, text: undefined, data: { staticClass: "w-40%" },children:'el-select2' },
@@ -20,7 +20,7 @@ const vnode = [
 
 <v-click>
 
-可以发现两组简化后vnode列表中存在空的注释节点，例如旧的vnode列表的最后一个节点和新vnode列表的第一个节点，正是这些注释类型的vnode导致了`patch`过程中位置的变化，因为头部尾部都不再能够直接修补，如果没有这些注释节点，`patch`的时候顺序就不会变化了
+可以发现两组简化后的vNode列表中存在空的注释节点，例如旧的vNode列表的最后一个节点和新vNode列表的第一个节点，正是这些注释类型的vNode导致了`diff`过程中位置的变化，因为头部尾部都不能够直接修补，如果没有这些注释节点，`diff`的过程顺序就不会变化了
 
 </v-click>
 
@@ -28,8 +28,8 @@ const vnode = [
 
 ````md magic-move
 ```ts
-// 旧vnode列表
-const vnode = [
+// 旧vNode列表
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
@@ -37,8 +37,8 @@ const vnode = [
 ```
 
 ```ts
-// 旧vnode列表
-const vnode = [
+// 旧vNode列表
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' }, // 我俩可以patch了
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
 ];
@@ -49,28 +49,28 @@ const vnode = [
 
 ````md magic-move
 ```ts
-// 新vnode列表
-const vnode = [
+// 新vNode列表
+const vNode = [
   { tag: undefined, isComment: true, key: undefined, text: "", data: undefined }, // 清除这个多余的注释节点
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' },
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
 ];
 ```
 ```ts
-// 新vnode列表
-const vnode = [
+// 新vNode列表
+const vNode = [
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select3' }, // 我俩可以patch了
   { tag: "div", isComment: false, key: undefined, text: undefined,children:'el-select2' },
 ];
 ```
 ````
 
-<v-clicks>
+<v-click>
 
-- 那么我们就要想办法消除这些多余的影响`patch`过程的节点，怎么消除呢
-- 首先我们要了解为什么会多出这些多余的空白注释vnode节点
+那么我们就要想办法消除这些多余的影响`diff`过程的节点，怎么消除呢
+首先我们要了解为什么会多出这些多余的空白注释vNode节点
 
-</v-clicks>
+</v-click>
 
 ---
 
@@ -102,7 +102,7 @@ const vnode = [
 
 <v-click>
 
-可以看到简化版的demo有着同样的问题，切换前后渲染的DOM位置不停变化，现象相同，所以我们可以通过观察这个简化组件的渲染函数来解决上面的问题
+可以看到简化版的demo有着同样的问题，切换前后渲染的DOM位置不停变化，现象相同，所以我们可以通过探究这个简化的demo来解决上面的问题
 
 </v-click>
 
@@ -161,7 +161,7 @@ function render() {
 
 需要重点关注的是渲染函数中`_setup.boolean`这个判断条件后面的渲染内容，
 可以看到两个判断条件对应了两个三元运算表达式，
-而表达式的结果中除了正常的`v-if`条件渲染的内容，都包含`_vm._e()`这个方法调用的结果。
+这两个表达式基本相同，结果中除了正常的`v-if`条件渲染的内容，都包含`_vm._e()`这个方法调用的结果。所以这个`_vm._e()`是什么呢
 
 </div>
 
@@ -191,7 +191,7 @@ export function installRenderHelpers(target: any) {
 }
 ```
 
-找到`_v`和`_e`对应的方法，可以看到分别是`createTextVNode`和`createEmptyVNode`的方法别名。很容易从函数名看出一个是创建文本vnode，一个是创建空的vnode。
+找到`_v`和`_e`对应的方法，可以看到分别是`createTextVNode`和`createEmptyVNode`的方法别名。很容易从函数名看出一个是创建文本vNode，一个是创建空的vNode。
 
 ---
 
@@ -218,7 +218,7 @@ function render() {
 
 ```
 
-也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时正常渲染结果，为否时渲染空的注释节点，这也就是为什么上面的vnode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点。那么如何避免生成这个多余的节点呢
+也就是说，上面的渲染函数中`_setup.boolean`部分对应的`v-if`的编译结果是，条件结果为真时渲染对应结果，为否时渲染空的注释节点，这也就是为什么上面的vNode列表中有很多空节点，因为同时只会有一个表达式为true，所以始终会有一个三元表达式的结果是一个空的注释节点。那么如何避免生成这个多余的节点呢
 
 <v-click>
 
