@@ -146,11 +146,11 @@ validate(trigger, callback = noop) {
 
 上一个问题中我们已经知道，在`patch`过程中，新旧vNode列表存在了错误的复用问题，导致前后DOM元素的位置发生错误。那么其实除了元素的复用导致的问题，其中还存在着组件实例复用引发的问题。
 
-这里给出一个简单的组件vNode`patch`流程图
+这里给出一个简单的 **组件** vNode`patch`流程图
 
-<n-image src="./share/componentvNodepatch.png" />
+<n-image src="./share/componentvnodepatch.png" />
 
-在之前的的`patchVnode`示意图中我们已经知道，复用的过程不止存在于普通的元素节点，组件节点也是需要复用的。`patchVnode`过程中，首先会把旧的vNode组件实例直接赋值给新的vNode组件节点，之后把新的vNode组件节点上的属性值（包括`props`，`listeners`，`attrs`等等）赋值给旧的vNode实例，重新去走一遍组件实例的“初始化”流程（处理新赋值的这些属性）。
+在之前的的`patchVnode`示意图中我们已经知道，复用的过程不止存在于真实元素，组件实例也是需要复用的。`patchVnode`过程中，首先会把旧的vNode组件实例直接赋值给新的vNode组件节点，之后把新的vNode组件节点上的属性值（包括`props`，`listeners`，`attrs`等等）赋值给旧的vNode实例，重新去走一遍组件实例的“初始化”流程（处理新赋值的这些属性）。
 
 
 所以这意味着`form`中`fields`字段保存的`formItem`实例在`patch`后，传入的`prop`和`rules`字段的值已经更新为新的vNode上对应的值
