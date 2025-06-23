@@ -7,12 +7,12 @@ transition: slide-left
 routerMode: 'hash'
 lineNumbers: true
 info: |
-  ## 深入理解patch过程
+  ## 深入Vue2中patch细节
 
 drawings:
   persist: false
 css: unocss
-title: 深入理解patch过程
+title: 深入Vue2中patch细节
 ---
 
 # **Bug案例分享**
@@ -23,7 +23,7 @@ v-motion
 :enter="{ x: 0, opacity: 1,  scale: 1.5, transition: { delay: 100, duration: 2500 } }"
 >
   <span class="color-orange text-xl">
-    深入理解patch过程
+    深入Vue2中patch细节
   </span>
 </div>
 

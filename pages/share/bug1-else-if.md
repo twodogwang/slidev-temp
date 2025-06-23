@@ -1,4 +1,4 @@
-## 那么还有其他更简单合理的方案吗
+## 更优方案
 
 重新观察两组列表，这里我们排除掉那些不会影响`diff`时vNode顺序的节点便于观察
 
@@ -233,10 +233,10 @@ function render() {
 
 ```ts {all}{maxHeight:'400px'}
 // src\compiler\parser\index.ts
-// parser阶段
+// parse阶段 把template中的内容解析成AST
 
 // 处理v-if属性
-function processIf(el) {
+function processIf(el: ASTElement) {
   // 获取指定attribute的值
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
@@ -297,7 +297,7 @@ function processIfConditions(el, parent) {
 
 ```ts {all}{maxHeight:'400px'}
 // src\compiler\codegen\index.ts
-// generatecode阶段
+// generate阶段 AST转换成渲染函数
 
 function genIf(
   el: any,
@@ -405,4 +405,4 @@ function render() {
 
 可以看到两处`_setup.boolean`的判断条件都并到了一个三元表达式中，这样在条件发生切换时，都只会影响一条三元表达式的值，而不会出现多余的注释空节点影响`patch`的结果。
 
-同样的，我们可以把出问题的代码中多的`v-if`改为`v-else-if`，发现问题也同样解决了
+同样的，我们可以把项目中代码的`v-if`改为`v-else-if`，发现问题也同样解决了
